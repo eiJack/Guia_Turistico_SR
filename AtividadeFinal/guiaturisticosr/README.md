@@ -1,6 +1,6 @@
 # guiaturisticosr
 
-A new Flutter project.
+Projeto feito para desenvolver um aplicativo para a rota do vinho de sao roque.
 
 ## Getting Started
 
