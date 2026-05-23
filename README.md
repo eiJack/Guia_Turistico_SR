@@ -1,6 +1,6 @@
 # Aplicativo - Guia Turistico SR <br><br>
 
-## Grupo
+# Grupo
 - Cristiane Barros
 - Jackeline de Paula
 
