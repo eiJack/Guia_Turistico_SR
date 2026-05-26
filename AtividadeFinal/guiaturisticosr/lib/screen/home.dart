@@ -9,6 +9,40 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  //iniciar avaliacao de conexao
+  final ConexaoService _conexaoService = ConexaoService();
+
+  @override
+  void initState() {
+    super.initState();
+
+    //executa so depois da tela toda ser construida
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _conexaoService.monitorarConexao(
+        onStatusChange: (conectado) {
+          if (!mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                conectado ? 'Internet conectada' : 'Sem conexão com a internet',
+              ),
+              backgroundColor: conectado ? Colors.green : Colors.red,
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _conexaoService.dispose();
+    super.dispose();
+  }
+
+  //-----------------------------------------------------------
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
