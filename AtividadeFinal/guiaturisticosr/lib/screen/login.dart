@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:guiaturisticosr/service/conexao_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:guiaturisticosr/service/auth_service.dart';
+import 'package:guiaturisticosr/screen/home.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -11,6 +14,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   //iniciar avaliacao de conexao
   final ConexaoService _conexaoService = ConexaoService();
+
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -42,7 +47,7 @@ class _LoginState extends State<Login> {
   }
 
   //-----------------------------------------------------------
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,7 +194,30 @@ class _LoginState extends State<Login> {
                   width: MediaQuery.of(context).size.width * 0.6,
                   height: 40,
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () async {
+                      User? user = await _authService.loginComGoogle();
+
+                      if (user != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Bem-vindo ${user.displayName}'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Home()),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Erro ao fazer login'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
 
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
