@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:guiaturisticosr/service/conexao_service.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -157,7 +158,7 @@ class _LoginState extends State<Login> {
 
                 // BOTÃO
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5, //30%da tela
+                  width: MediaQuery.of(context).size.width * 0.6, //30%da tela
                   height: 40,
 
                   child: ElevatedButton(
@@ -185,7 +186,7 @@ class _LoginState extends State<Login> {
                 const SizedBox(height: 10),
 
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  width: MediaQuery.of(context).size.width * 0.6,
                   height: 40,
                   child: ElevatedButton.icon(
                     onPressed: () {},
