@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:guiaturisticosr/screen/login.dart';
 import 'package:guiaturisticosr/service/conexao_service.dart';
+import 'package:guiaturisticosr/screen/mapa.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -153,7 +154,16 @@ class _HomeState extends State<Home> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _cardMenu(icon: Icons.location_on, titulo: "Mapa"),
+                _cardMenu(
+                  icon: Icons.location_on,
+                  titulo: "Mapa",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MapaScreen()),
+                    );
+                  },
+                ),
                 _cardMenu(icon: Icons.wine_bar, titulo: "Vinícolas"),
                 _cardMenu(icon: Icons.star, titulo: "Avaliações"),
               ],
