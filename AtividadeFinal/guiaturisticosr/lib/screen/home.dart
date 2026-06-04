@@ -43,8 +43,7 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  //-----------------------------------------------------------
-  
+  //-------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +88,12 @@ class _HomeState extends State<Home> {
             ListTile(
               leading: const Icon(Icons.map),
               title: const Text("Mapa"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MapaScreen()),
+                );
+              },
             ),
 
             ListTile(
@@ -174,24 +178,35 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _cardMenu({required IconData icon, required String titulo}) {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3)),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 35, color: const Color(0xFF8B1E3F)),
-          const SizedBox(height: 10),
-          Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
+  Widget _cardMenu({
+    required IconData icon,
+    required String titulo,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 35, color: const Color(0xFF8B1E3F)),
+            const SizedBox(height: 10),
+            Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }
