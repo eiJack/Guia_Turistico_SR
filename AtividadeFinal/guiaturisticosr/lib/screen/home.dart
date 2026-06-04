@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:guiaturisticosr/screen/login.dart';
 import 'package:guiaturisticosr/service/conexao_service.dart';
+import 'package:guiaturisticosr/screen/login.dart';
 import 'package:guiaturisticosr/screen/mapa.dart';
+import 'package:guiaturisticosr/screen/favoritos.dart';
+import 'package:guiaturisticosr/screen/perfil.dart';
+_________________________________________________
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -43,9 +47,14 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  //-------------------------------------------------------------
+  //-----------------------------------------------------------
+  
   @override
   Widget build(BuildContext context) {
+    //verificando se usuario esta logado
+    final User? usuario = FirebaseAuth.instance.currentUser;
+    final bool logado = usuario != null;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF5F1ED),
 
@@ -59,19 +68,34 @@ class _HomeState extends State<Home> {
       drawer: Drawer(
         child: ListView(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF8B1E3F)),
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF8B1E3F)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(Icons.wine_bar, size: 50, color: Colors.white),
-                  SizedBox(height: 10),
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.white,
+                    backgroundImage: usuario?.photoURL != null
+                        ? NetworkImage(usuario!.photoURL!)
+                        : null,
+                    child: usuario?.photoURL == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 35,
+                            color: Color(0xFF8B1E3F),
+                          )
+                        : null,
+                  ),
+
+                  const SizedBox(height: 12),
+
                   Text(
-                    "Rota do Vinho",
-                    style: TextStyle(
+                    usuario?.displayName ?? "Visitante",
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -99,19 +123,78 @@ class _HomeState extends State<Home> {
             ListTile(
               leading: const Icon(Icons.favorite),
               title: const Text("Favoritos"),
-              onTap: () {},
-            ),
-
-            ListTile(
-              leading: const Icon(Icons.login),
-              title: const Text("Login"),
               onTap: () {
+                if (!logado) {
+                  _mostrarAvisoLogin();
+                  return;
+                }
+
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Login()),
+                  MaterialPageRoute(builder: (_) => const FavoritosScreen()),
                 );
               },
             ),
+
+            if (logado)
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text("Perfil"),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PerfilScreen()),
+                  );
+                },
+              ),
+
+            ListTile(
+              leading: Icon(logado ? Icons.logout : Icons.login),
+              title: Text(logado ? "Sair" : "Login"),
+              onTap: () async {
+                if (logado) {
+                  final sair = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Sair da conta"),
+                      content: const Text(
+                        "Deseja realmente encerrar sua sessão?",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text("Cancelar"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Sair"),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (sair == true) {
+                    await FirebaseAuth.instance.signOut();
+
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Logout realizado com sucesso"),
+                      ),
+                    );
+
+                    setState(() {});
+                  }
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login()),
+                  );
+                }
+              },
+            ),
+            
           ],
         ),
       ),
@@ -156,7 +239,7 @@ class _HomeState extends State<Home> {
             const SizedBox(height: 30),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, //espaço do card
               children: [
                 _cardMenu(
                   icon: Icons.location_on,
@@ -168,10 +251,26 @@ class _HomeState extends State<Home> {
                     );
                   },
                 ),
-                _cardMenu(icon: Icons.wine_bar, titulo: "Vinícolas"),
-                _cardMenu(icon: Icons.star, titulo: "Avaliações"),
+                _cardMenu(
+                  icon: Icons.favorite,
+                  titulo: "Favoritos",
+                  onTap: () {
+                    if (!logado) {
+                      _mostrarAvisoLogin();
+                      return;
+                    }
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FavoritosScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
+            
           ],
         ),
       ),
@@ -183,31 +282,57 @@ class _HomeState extends State<Home> {
     required String titulo,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 35, color: const Color(0xFF8B1E3F)),
-            const SizedBox(height: 10),
-            Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3)),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 35, color: const Color(0xFF8B1E3F)),
+          const SizedBox(height: 10),
+          Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
+
+  void _mostrarAvisoLogin() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Login necessário"),
+        content: const Text(
+          "Esta funcionalidade está disponível apenas para usuários logados.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancelar"),
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Login()),
+              );
+            },
+            child: const Text("Logar"),
+          ),
+        ],
+      ),
+    );
+  }
+  
 }

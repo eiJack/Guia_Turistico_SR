@@ -24,11 +24,77 @@ class PontosService {
       ),
 
       PontosTuristicos(
+        nome: 'Quinta do Olivardo',
+        categoria: 'Restaurante',
+        rotaDoVinho: true,
+        latitude: -23.57711,
+        longitude: -47.13866,
+        descricao:
+            'Famoso complexo enogastronômico tradicional da Rota do Vinho.',
+      ),
+
+      PontosTuristicos(
+        nome: 'Estilla Destilaria e Cervejaria',
+        categoria: 'Restaurante',
+        rotaDoVinho: true,
+        latitude: -23.56862,
+        longitude: -47.13865,
+        descricao:
+            'Cervejaria fundada em 1989, que se destaca por fazer vinhos, destilados e cervejas.',
+      ),
+
+      PontosTuristicos(
+        nome: 'Hockenheim Cervejaria',
+        categoria: 'Restaurante',
+        rotaDoVinho: true,
+        latitude: -23.59089,
+        longitude: -47.14739,
+        descricao:
+            'Uma fábrica de cervejas artesanais de alta qualidade com um restaurante focado em cortes de carne nobres.',
+      ),
+
+      PontosTuristicos(
+        nome: 'Caracol Chocolates',
+        categoria: 'Restaurante',
+        rotaDoVinho: true,
+        latitude: -23.55728,
+        longitude: -47.12685,
+        descricao: 'Chocolateria & Cafeteria .',
+      ),
+
+      PontosTuristicos(
+        nome: 'Pica Fumo Restaurante',
+        categoria: 'Restaurante',
+        rotaDoVinho: true,
+        latitude: -23.55846,
+        longitude: -47.12861,
+        descricao: 'Restaurante tradicional de sao roque',
+      ),
+
+      PontosTuristicos(
+        nome: 'Dionísio Restaurante',
+        categoria: 'Restaurante',
+        rotaDoVinho: true,
+        latitude: -23.56221,
+        longitude: -47.13199,
+        descricao: 'Restaurante tradicional de sao roque',
+      ),
+
+      PontosTuristicos(
+        nome: 'Vinícola Goes',
+        categoria: 'Rota do Vinho',
+        rotaDoVinho: true,
+        latitude: -23.61079,
+        longitude: -47.16019,
+        descricao: 'Vinícola tradicional da região.',
+      ),
+
+      PontosTuristicos(
         nome: 'Bella Aurora',
         categoria: 'Rota do Vinho',
         rotaDoVinho: false,
-        latitude: -23.5400,
-        longitude: -47.1420,
+        latitude: -23.55364,
+        longitude: -47.10524,
         descricao: 'Vinhos, adega e gastronomia.',
       ),
 
@@ -44,8 +110,8 @@ class PontosService {
         nome: 'Restaurante Recanto Nordestino',
         categoria: 'Restaurante',
         rotaDoVinho: true,
-        latitude: -23.5290,
-        longitude: -47.1380,
+        latitude: -23.55492,
+        longitude: -47.12534,
         descricao:
             'Restaurante nordestino com buffet à vontade e pratos típicos.',
       ),
@@ -55,8 +121,8 @@ class PontosService {
         nome: 'O Cortês Bar e Restaurante',
         categoria: 'Restaurante',
         rotaDoVinho: true,
-        latitude: -23.5300,
-        longitude: -47.1350,
+        latitude: -23.52562,
+        longitude: -47.13336,
         descricao: 'Restaurante e bar em São Roque.',
       ),
 
@@ -74,8 +140,8 @@ class PontosService {
         nome: 'NÓR Hotel & Spa',
         categoria: 'Hotel',
         rotaDoVinho: false,
-        latitude: -23.5728,
-        longitude: -47.1735,
+        latitude: -23.57260,
+        longitude: -47.12234,
         descricao: 'Hotel e spa em São Roque.',
       ),
 
@@ -83,8 +149,8 @@ class PontosService {
         nome: 'Hotel Stefano',
         categoria: 'Hotel',
         rotaDoVinho: false,
-        latitude: -23.55089,
-        longitude: -47.10196,
+        latitude: -23.55109,
+        longitude: -47.10195,
         descricao: 'Hotel tradicional da cidade.',
       ),
 
@@ -92,9 +158,18 @@ class PontosService {
         nome: 'Restaurante Stefano',
         categoria: 'Restaurante',
         rotaDoVinho: false,
-        latitude: -23.55089,
-        longitude: -47.10196,
+        latitude: -23.55109,
+        longitude: -47.10195,
         descricao: 'Restaurante anexo ao hotel Stefano.',
+      ),
+
+      PontosTuristicos(
+        nome: 'Pousada Garden House',
+        categoria: 'Hotel',
+        rotaDoVinho: false,
+        latitude: -23.62748,
+        longitude: -47.15605,
+        descricao: 'Pousada tradicional da cidade.',
       ),
 
       // TURISMO
@@ -102,8 +177,8 @@ class PontosService {
         nome: 'Morro do Saboó',
         categoria: 'Ponto turistico',
         rotaDoVinho: false,
-        latitude: -23.5065,
-        longitude: -47.0826,
+        latitude: -23.47522,
+        longitude: -47.16303,
         descricao: 'Trilhas, natureza e mirantes.',
       ),
 
@@ -111,18 +186,18 @@ class PontosService {
         nome: 'Centro Cultural Brasital',
         categoria: 'Ponto turistico',
         rotaDoVinho: false,
-        latitude: -23.5305,
-        longitude: -47.1355,
+        latitude: -23.53338,
+        longitude: -47.13101,
         descricao: 'Centro cultural de São Roque.',
       ),
 
       PontosTuristicos(
-        nome: 'Ski Mountain Park',
+        nome: 'Igreja Matriz de São Roque',
         categoria: 'Ponto turistico',
         rotaDoVinho: false,
-        latitude: -23.506316,
-        longitude: -47.11695,
-        descricao: 'Parque de lazer e aventura.',
+        latitude: -23.53031,
+        longitude: -47.13564,
+        descricao: 'Igreja matriz, tradicional da cidade.',
       ),
     ];
   }
