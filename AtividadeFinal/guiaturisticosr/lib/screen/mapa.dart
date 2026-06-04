@@ -3,6 +3,7 @@ import '../controller/mapa_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 class MapaScreen extends StatefulWidget {
   const MapaScreen({super.key});
@@ -17,6 +18,15 @@ class _MapaScreenState extends State<MapaScreen> {
 
   double zoomAtual = 14;
   bool mapaPronto = false;
+  LatLng? minhaLocalizacao;
+  final LatLng localizacaoPadrao = LatLng(-23.554328, -47.124203);
+  bool avisoForaDaRegiaoExibido = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pegarLocalizacaoAtual();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +39,7 @@ class _MapaScreenState extends State<MapaScreen> {
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
-              initialCenter: LatLng(-23.5297, -47.1356),
+              initialCenter: minhaLocalizacao ?? localizacaoPadrao,
               initialZoom: zoomAtual,
               minZoom: 10,
               maxZoom: 18,
@@ -51,23 +61,36 @@ class _MapaScreenState extends State<MapaScreen> {
               ),
 
               MarkerLayer(
-                markers: pontos.map((ponto) {
-                  return Marker(
-                    point: LatLng(ponto.latitude, ponto.longitude),
-                    width: 50,
-                    height: 50,
-                    child: GestureDetector(
-                      onTap: () {
-                        _abrirDetalhesPonto(context, ponto);
-                      },
-                      child: Icon(
-                        _iconPorCategoria(ponto.categoria),
-                        color: _corPorCategoria(ponto.categoria),
-                        size: 40,
+                markers: [
+                  if (minhaLocalizacao != null)
+                    Marker(
+                      point: minhaLocalizacao!,
+                      width: 50,
+                      height: 50,
+                      child: const Icon(
+                        Icons.person_pin_circle,
+                        color: Color.fromARGB(255, 133, 7, 74),
+                        size: 45,
                       ),
                     ),
-                  );
-                }).toList(),
+
+                  ...pontos.map((ponto) {
+                    return Marker(
+                      point: LatLng(ponto.latitude, ponto.longitude),
+                      width: 50,
+                      height: 50,
+                      child: GestureDetector(
+                        onTap: () {
+                          _abrirDetalhesPonto(context, ponto);
+                        },
+                        child: Icon(
+                          _iconPorCategoria(ponto.categoria),
+                          color: _corPorCategoria(ponto.categoria),
+                          size: 40,
+                        ),
+                      ),
+                    );
+                }),
               ),
             ],
           ),
@@ -245,6 +268,88 @@ class _MapaScreenState extends State<MapaScreen> {
 
       default:
         return Colors.red;
+    }
+  }
+//-------------------pegar localizacao atual-----------------
+  Future<void> _pegarLocalizacaoAtual() async {
+    bool servicoAtivo;
+    LocationPermission permissao;
+
+    servicoAtivo = await Geolocator.isLocationServiceEnabled();
+
+    if (!servicoAtivo) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Ative a localização do dispositivo.")),
+      );
+      return;
+    }
+
+    permissao = await Geolocator.checkPermission();
+
+    if (permissao == LocationPermission.denied) {
+      permissao = await Geolocator.requestPermission();
+
+      if (permissao == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Permissão de localização negada.")),
+        );
+        return;
+      }
+    }
+
+    if (permissao == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Permissão de localização negada permanentemente."),
+        ),
+      );
+      return;
+    }
+
+    final Position posicao = await Geolocator.getCurrentPosition();
+
+    if (!mounted) return;
+
+    final LatLng localizacaoUsuario = LatLng(
+      posicao.latitude,
+      posicao.longitude,
+    );
+
+    final double distanciaEmMetros = Geolocator.distanceBetween(
+      localizacaoUsuario.latitude,
+      localizacaoUsuario.longitude,
+      localizacaoPadrao.latitude,
+      localizacaoPadrao.longitude,
+    );
+
+    if (distanciaEmMetros <= 20000) {
+      setState(() {
+        minhaLocalizacao = localizacaoUsuario;
+      });
+
+      if (mapaPronto) {
+        mapController.move(minhaLocalizacao!, 15);
+      }
+    } else {
+      setState(() {
+        minhaLocalizacao = null;
+      });
+
+      if (mapaPronto) {
+        mapController.move(localizacaoPadrao, 14);
+      }
+
+      if (!avisoForaDaRegiaoExibido) {
+        avisoForaDaRegiaoExibido = true;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Você está fora da região de São Roque. Exibindo mapa padrão.",
+            ),
+          ),
+        );
+      }
     }
   }
 }
