@@ -101,7 +101,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-            )
+            ),
 
             ListTile(
               leading: const Icon(Icons.home),
@@ -277,7 +277,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _cardMenu({required IconData icon, required String titulo}) {
+  Widget _cardMenu({
+    required IconData icon,
+    required String titulo,
+    VoidCallback? onTap,
+  }) {
     return Container(
       width: 100,
       height: 100,
