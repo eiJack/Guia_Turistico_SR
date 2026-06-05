@@ -54,45 +54,46 @@ class _MapaScreenState extends State<MapaScreen> {
                 zoomAtual = position.zoom;
               },
             ),
+
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.guia_turistico_sr',
               ),
+            ],
+          ),
 
-              MarkerLayer(
-                markers: [
-                  if (minhaLocalizacao != null)
-                    Marker(
-                      point: minhaLocalizacao!,
-                      width: 50,
-                      height: 50,
-                      child: const Icon(
-                        Icons.person_pin_circle,
-                        color: Color.fromARGB(255, 133, 7, 74),
-                        size: 45,
-                      ),
+          MarkerLayer(
+            markers: [
+              if (minhaLocalizacao != null)
+                Marker(
+                  point: minhaLocalizacao!,
+                  width: 50,
+                  height: 50,
+                  child: const Icon(
+                    Icons.person_pin_circle,
+                    color: Color.fromARGB(255, 133, 7, 74),
+                    size: 45,
+                  ),
+                ),
+
+              ...pontos.map((ponto) {
+                return Marker(
+                  point: LatLng(ponto.latitude, ponto.longitude),
+                  width: 50,
+                  height: 50,
+                  child: GestureDetector(
+                    onTap: () {
+                      _abrirDetalhesPonto(context, ponto);
+                    },
+                    child: Icon(
+                      _iconPorCategoria(ponto.categoria),
+                      color: _corPorCategoria(ponto.categoria),
+                      size: 40,
                     ),
-
-                  ...pontos.map((ponto) {
-                    return Marker(
-                      point: LatLng(ponto.latitude, ponto.longitude),
-                      width: 50,
-                      height: 50,
-                      child: GestureDetector(
-                        onTap: () {
-                          _abrirDetalhesPonto(context, ponto);
-                        },
-                        child: Icon(
-                          _iconPorCategoria(ponto.categoria),
-                          color: _corPorCategoria(ponto.categoria),
-                          size: 40,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
+                  ),
+                );
+              }).toList(),
             ],
           ),
 
