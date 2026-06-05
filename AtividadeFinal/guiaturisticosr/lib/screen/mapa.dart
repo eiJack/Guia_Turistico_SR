@@ -90,7 +90,8 @@ class _MapaScreenState extends State<MapaScreen> {
                         ),
                       ),
                     );
-                }),
+                  }).toList(),
+                ],
               ),
             ],
           ),
@@ -270,7 +271,8 @@ class _MapaScreenState extends State<MapaScreen> {
         return Colors.red;
     }
   }
-//-------------------pegar localizacao atual-----------------
+
+  //-------------------pegar localizacao atual-----------------
   Future<void> _pegarLocalizacaoAtual() async {
     bool servicoAtivo;
     LocationPermission permissao;
