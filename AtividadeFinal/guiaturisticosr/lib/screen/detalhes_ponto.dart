@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:guiaturisticosr/model/avaliacao.dart';
+import 'package:guiaturisticosr/service/avaliacao_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class DetalhesPonto extends StatefulWidget {
   final String nome;
@@ -49,33 +53,47 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
     }
   }
 
-  void enviarAvaliacao() {
-    if (nota == 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecione uma nota antes de enviar.')));
-      return;
-    }
+  Future<void> enviarAvaliacao() async {
+    String? fotoUrl;
 
-    setState(() {
-      avaliacoes.add(
-        Avaliacao(
-          nomeUsuario: "Cristiane",
-          fotoUsuario: "https://i.pravatar.cc/150?img=5",
-          nota: nota,
-          comentario: comentarioController.text,
-          fotoAvaliacao: foto?.path,
-        ),
+    if (foto != null) {
+      print('Iniciando upload...');
+
+      final storageRef = FirebaseStorage.instance.ref().child(
+        'avaliacoes/${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
 
-      comentarioController.clear();
-      nota = 0;
-      foto = null;
-    });
+      print('Caminho: ${storageRef.fullPath}');
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Avaliação enviada com sucesso!')));
+      await storageRef.putFile(foto!);
+
+      print('Upload concluído');
+
+      fotoUrl = await storageRef.getDownloadURL();
+
+      print('URL: $fotoUrl');
+    }
+    final avaliacao = Avaliacao(
+      nomeUsuario: FirebaseAuth.instance.currentUser?.displayName ?? "Usuário",
+      fotoUsuario: FirebaseAuth.instance.currentUser?.photoURL ?? "https://i.pravatar.cc/150?img=5",
+      nota: nota,
+      comentario: comentarioController.text,
+      fotoAvaliacao: fotoUrl, // agora salva a URL da foto
+    );
+
+    await AvaliacaoService().salvarAvaliacao(widget.nome, avaliacao);
+
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Avaliação salva no Firebase!')));
+
+      comentarioController.clear();
+      setState(() {
+        nota = 0;
+        foto = null;
+      });
+    }
   }
 
   Future<void> ligarTelefone() async {
@@ -259,80 +277,85 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
 
                   const SizedBox(height: 15),
 
-                  if (avaliacoes.isEmpty)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: Text("Nenhuma avaliação cadastrada."),
-                      ),
-                    )
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: avaliacoes.length,
-                      itemBuilder: (context, index) {
-                        final avaliacao = avaliacoes[index];
+                  StreamBuilder<QuerySnapshot>(
+                    stream: AvaliacaoService().carregarAvaliacoes(widget.nome),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 15),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundImage: NetworkImage(avaliacao.fotoUsuario),
-                                    ),
+                      if (snapshot.hasError) {
+                        return Text('Erro: ${snapshot.error}');
+                      }
 
-                                    const SizedBox(width: 10),
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(child: Text("Nenhuma avaliação cadastrada."));
+                      }
 
-                                    Expanded(
-                                      child: Text(
-                                        avaliacao.nomeUsuario,
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      final avaliacoes = snapshot.data!.docs;
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: avaliacoes.length,
+                        itemBuilder: (context, index) {
+                          final dados = avaliacoes[index].data() as Map<String, dynamic>;
+
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 15),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundImage: NetworkImage(dados['fotoUsuario']),
                                       ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Row(
-                                  children: List.generate(
-                                    5,
-                                    (i) => Icon(
-                                      i < avaliacao.nota ? Icons.star : Icons.star_border,
-                                      color: Colors.amber,
-                                    ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          dados['nomeUsuario'],
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Text(avaliacao.comentario),
-
-                                if (avaliacao.fotoAvaliacao != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.file(
-                                        File(avaliacao.fotoAvaliacao!),
-                                        height: 200,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: List.generate(
+                                      5,
+                                      (i) => Icon(
+                                        i < dados['nota'] ? Icons.star : Icons.star_border,
+                                        color: Colors.amber,
                                       ),
                                     ),
                                   ),
-                              ],
+                                  const SizedBox(height: 10),
+                                  Text(dados['comentario']),
+                                  if (dados['fotoAvaliacao'] != null &&
+                                      dados['fotoAvaliacao'].isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.network(
+                                          dados['fotoAvaliacao'],
+                                          height: 200,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

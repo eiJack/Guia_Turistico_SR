@@ -12,4 +12,24 @@ class Avaliacao {
     required this.comentario,
     this.fotoAvaliacao,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'nomeUsuario': nomeUsuario,
+      'fotoUsuario': fotoUsuario,
+      'nota': nota,
+      'comentario': comentario,
+      'fotoAvaliacao': fotoAvaliacao,
+    };
+  }
+
+  factory Avaliacao.fromMap(Map<String, dynamic> map) {
+    return Avaliacao(
+      nomeUsuario: map['nomeUsuario'],
+      fotoUsuario: map['fotoUsuario'],
+      nota: map['nota'],
+      comentario: map['comentario'],
+      fotoAvaliacao: map['fotoAvaliacao'],
+    );
+  }
 }
