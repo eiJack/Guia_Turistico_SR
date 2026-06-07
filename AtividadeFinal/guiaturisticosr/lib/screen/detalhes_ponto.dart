@@ -153,36 +153,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.nome),
-        actions: [
-          IconButton(
-            icon: Icon(favorito ? Icons.favorite : Icons.favorite_border, color: Colors.red),
-            onPressed: () async {
-              if (FirebaseAuth.instance.currentUser == null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text("Faça login para favoritar")));
-                return;
-              }
-
-              if (favorito) {
-                await FavoritosService().removerFavorito(widget.nome);
-              } else {
-                await FavoritosService().adicionarFavorito(
-                  nome: widget.nome,
-                  imagem: widget.imagem,
-                  descricao: widget.descricao,
-                );
-              }
-
-              setState(() {
-                favorito = !favorito;
-              });
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(widget.nome)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,9 +165,44 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.nome,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.nome,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          favorito ? Icons.favorite : Icons.favorite_border,
+                          color: Colors.red,
+                        ),
+                        onPressed: () async {
+                          if (FirebaseAuth.instance.currentUser == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Faça login para favoritar")),
+                            );
+                            return;
+                          }
+
+                          if (favorito) {
+                            await FavoritosService().removerFavorito(widget.nome);
+                          } else {
+                            await FavoritosService().adicionarFavorito(
+                              nome: widget.nome,
+                              imagem: widget.imagem,
+                              descricao: widget.descricao,
+                            );
+                          }
+
+                          setState(() {
+                            favorito = !favorito;
+                          });
+                        },
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 12),
