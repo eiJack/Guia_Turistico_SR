@@ -54,6 +54,13 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   }
 
   Future<void> enviarAvaliacao() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Faça login para enviar uma avaliação.')));
+      return;
+    }
+
     String? fotoUrl;
 
     if (foto != null) {
