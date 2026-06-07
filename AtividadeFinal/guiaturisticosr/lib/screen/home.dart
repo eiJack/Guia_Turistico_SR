@@ -274,11 +274,6 @@ class _HomeState extends State<Home> {
   }) {
     return GestureDetector(
       onTap: () {
-        if (!logado) {
-          _mostrarAvisoLogin();
-          return;
-        }
-
         Navigator.push(
           context,
           MaterialPageRoute(
