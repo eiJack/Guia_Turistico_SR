@@ -274,20 +274,20 @@ class _HomeState extends State<Home> {
   }) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DetalhesPonto(
-              nome: nome,
-              imagem: imagem,
-              descricao: descricao,
-              telefone: telefone,
-              whatsapp: whatsapp,
-              endereco: endereco,
-            ),
-          ),
-        );
-      },
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => DetalhesPonto(
+        nome: nome,
+        imagem: imagem,
+        descricao: descricao,
+        telefone: telefone,
+        whatsapp: whatsapp,
+        endereco: endereco,
+      ),
+    ),
+  );
+},
       child: Container(
         width: 180,
         margin: const EdgeInsets.only(right: 10),

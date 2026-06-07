@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:guiaturisticosr/service/favoritos_service.dart';
+import 'package:guiaturisticosr/screen/mapa.dart';
 
 class DetalhesPonto extends StatefulWidget {
   final String nome;
@@ -90,16 +91,11 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
         'avaliacoes/${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
 
-      print('Caminho: ${storageRef.fullPath}');
-
       await storageRef.putFile(foto!);
 
-      print('Upload concluído');
-
       fotoUrl = await storageRef.getDownloadURL();
-
-      print('URL: $fotoUrl');
     }
+
     final avaliacao = Avaliacao(
       nomeUsuario: FirebaseAuth.instance.currentUser?.displayName ?? "Usuário",
       fotoUsuario: FirebaseAuth.instance.currentUser?.photoURL ?? "https://i.pravatar.cc/150?img=5",
@@ -149,6 +145,18 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
     comentarioController.dispose();
     super.dispose();
   }
+
+  //========abrir mapa===========
+  Future<void> abrirMapa() async {
+    final endereco = Uri.encodeComponent(widget.endereco);
+
+    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$endereco');
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+  //=============
 
   @override
   Widget build(BuildContext context) {
@@ -205,11 +213,11 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
                   Text(widget.descricao, style: const TextStyle(fontSize: 16)),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 00),
 
                   Row(
                     children: [
@@ -229,7 +237,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   Row(
                     children: [
@@ -253,18 +261,32 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                     ],
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+
+                  //======botão para abrir mapa========
+                  Center(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.map),
+                      label: const Text('Abrir mapa'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MapaScreen()),
+                        );
+                      },
+                    ),
+                  ),
 
                   const Divider(),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
 
                   const Text(
                     "Avaliações",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -296,7 +318,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
 
                   ElevatedButton.icon(
                     onPressed: tirarFoto,
