@@ -131,17 +131,15 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   }
 
   Future<void> abrirWhatsapp() async {
-    final numero = widget.whatsapp
-        .replaceAll("(", "")
-        .replaceAll(")", "")
-        .replaceAll("-", "")
-        .replaceAll(" ", "");
+    String numero = widget.whatsapp.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (!numero.startsWith('55')) {
+      numero = '55$numero';
+    }
 
     final uri = Uri.parse('https://wa.me/$numero');
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
