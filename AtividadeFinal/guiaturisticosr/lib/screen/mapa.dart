@@ -43,57 +43,54 @@ class _MapaScreenState extends State<MapaScreen> {
               initialZoom: zoomAtual,
               minZoom: 10,
               maxZoom: 18,
-
               onMapReady: () {
                 setState(() {
                   mapaPronto = true;
                 });
               },
-
               onPositionChanged: (position, hasGesture) {
                 zoomAtual = position.zoom;
               },
             ),
-
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.guia_turistico_sr',
               ),
-            ],
-          ),
 
-          MarkerLayer(
-            markers: [
-              if (minhaLocalizacao != null)
-                Marker(
-                  point: minhaLocalizacao!,
-                  width: 50,
-                  height: 50,
-                  child: const Icon(
-                    Icons.person_pin_circle,
-                    color: Color.fromARGB(255, 133, 7, 74),
-                    size: 45,
-                  ),
-                ),
-
-              ...pontos.map((ponto) {
-                return Marker(
-                  point: LatLng(ponto.latitude, ponto.longitude),
-                  width: 50,
-                  height: 50,
-                  child: GestureDetector(
-                    onTap: () {
-                      _abrirDetalhesPonto(context, ponto);
-                    },
-                    child: Icon(
-                      _iconPorCategoria(ponto.categoria),
-                      color: _corPorCategoria(ponto.categoria),
-                      size: 40,
+              MarkerLayer(
+                markers: [
+                  if (minhaLocalizacao != null)
+                    Marker(
+                      point: minhaLocalizacao!,
+                      width: 50,
+                      height: 50,
+                      child: const Icon(
+                        Icons.person_pin_circle,
+                        color: Color.fromARGB(255, 133, 7, 74),
+                        size: 45,
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
+
+                  ...pontos.map((ponto) {
+                    return Marker(
+                      point: LatLng(ponto.latitude, ponto.longitude),
+                      width: 50,
+                      height: 50,
+                      child: GestureDetector(
+                        onTap: () {
+                          _abrirDetalhesPonto(context, ponto);
+                        },
+                        child: Icon(
+                          _iconPorCategoria(ponto.categoria),
+                          color: _corPorCategoria(ponto.categoria),
+                          size: 40,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
             ],
           ),
 
@@ -104,8 +101,7 @@ class _MapaScreenState extends State<MapaScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: controller.categorias.map((categoria) {
-                final selecionado =
-                    controller.categoriaSelecionada == categoria;
+                final selecionado = controller.categoriaSelecionada == categoria;
 
                 return GestureDetector(
                   onTap: () {
@@ -116,23 +112,15 @@ class _MapaScreenState extends State<MapaScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: selecionado
-                          ? const Color(0xFF8B1E3F)
-                          : Colors.white,
+                      color: selecionado ? const Color(0xFF8B1E3F) : Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 5,
-                          offset: Offset(0, 2),
-                        ),
+                        BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 2)),
                       ],
                     ),
                     child: Icon(
                       _iconPorCategoria(categoria),
-                      color: selecionado
-                          ? Colors.white
-                          : const Color(0xFF8B1E3F),
+                      color: selecionado ? Colors.white : const Color(0xFF8B1E3F),
                       size: 26,
                     ),
                   ),
@@ -153,10 +141,7 @@ class _MapaScreenState extends State<MapaScreen> {
                             if (zoomAtual < 18) {
                               zoomAtual++;
 
-                              mapController.move(
-                                mapController.camera.center,
-                                zoomAtual,
-                              );
+                              mapController.move(mapController.camera.center, zoomAtual);
                             }
                           });
                         }
@@ -174,10 +159,7 @@ class _MapaScreenState extends State<MapaScreen> {
                             if (zoomAtual > 10) {
                               zoomAtual--;
 
-                              mapController.move(
-                                mapController.camera.center,
-                                zoomAtual,
-                              );
+                              mapController.move(mapController.camera.center, zoomAtual);
                             }
                           });
                         }
@@ -206,20 +188,11 @@ class _MapaScreenState extends State<MapaScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                ponto.nome,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(ponto.nome, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
 
               const SizedBox(height: 8),
 
-              Text(
-                ponto.categoria,
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+              Text(ponto.categoria, style: const TextStyle(fontSize: 16, color: Colors.grey)),
 
               const SizedBox(height: 12),
 
@@ -281,9 +254,9 @@ class _MapaScreenState extends State<MapaScreen> {
     servicoAtivo = await Geolocator.isLocationServiceEnabled();
 
     if (!servicoAtivo) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ative a localização do dispositivo.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Ative a localização do dispositivo.")));
       return;
     }
 
@@ -293,18 +266,16 @@ class _MapaScreenState extends State<MapaScreen> {
       permissao = await Geolocator.requestPermission();
 
       if (permissao == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Permissão de localização negada.")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Permissão de localização negada.")));
         return;
       }
     }
 
     if (permissao == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Permissão de localização negada permanentemente."),
-        ),
+        const SnackBar(content: Text("Permissão de localização negada permanentemente.")),
       );
       return;
     }
@@ -313,10 +284,7 @@ class _MapaScreenState extends State<MapaScreen> {
 
     if (!mounted) return;
 
-    final LatLng localizacaoUsuario = LatLng(
-      posicao.latitude,
-      posicao.longitude,
-    );
+    final LatLng localizacaoUsuario = LatLng(posicao.latitude, posicao.longitude);
 
     final double distanciaEmMetros = Geolocator.distanceBetween(
       localizacaoUsuario.latitude,
@@ -347,9 +315,7 @@ class _MapaScreenState extends State<MapaScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              "Você está fora da região de São Roque. Exibindo mapa padrão.",
-            ),
+            content: Text("Você está fora da região de São Roque. Exibindo mapa padrão."),
           ),
         );
       }

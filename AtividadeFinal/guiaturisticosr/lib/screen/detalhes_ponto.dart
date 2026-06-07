@@ -8,6 +8,7 @@ import 'package:guiaturisticosr/service/avaliacao_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:guiaturisticosr/service/favoritos_service.dart';
 
 class DetalhesPonto extends StatefulWidget {
   final String nome;
@@ -53,6 +54,25 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
     }
   }
 
+  //==========favoritos===========
+  @override
+  void initState() {
+    super.initState();
+    carregarFavorito();
+  }
+
+  bool favorito = false;
+  Future<void> carregarFavorito() async {
+    if (FirebaseAuth.instance.currentUser == null) return;
+
+    favorito = await FavoritosService().isFavorito(widget.nome);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  //==========avaliação===========
   Future<void> enviarAvaliacao() async {
     if (FirebaseAuth.instance.currentUser == null) {
       ScaffoldMessenger.of(
@@ -85,15 +105,13 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
       fotoUsuario: FirebaseAuth.instance.currentUser?.photoURL ?? "https://i.pravatar.cc/150?img=5",
       nota: nota,
       comentario: comentarioController.text,
-      fotoAvaliacao: fotoUrl, // agora salva a URL da foto
+      fotoAvaliacao: fotoUrl,
     );
 
     await AvaliacaoService().salvarAvaliacao(widget.nome, avaliacao);
 
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Avaliação salva no Firebase!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Avaliação salva!')));
 
       comentarioController.clear();
       setState(() {
@@ -103,6 +121,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
     }
   }
 
+  //=========telefone/ligação e whatsapp===========
   Future<void> ligarTelefone() async {
     final uri = Uri.parse('tel:${widget.telefone}');
 
@@ -134,7 +153,36 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.nome)),
+      appBar: AppBar(
+        title: Text(widget.nome),
+        actions: [
+          IconButton(
+            icon: Icon(favorito ? Icons.favorite : Icons.favorite_border, color: Colors.red),
+            onPressed: () async {
+              if (FirebaseAuth.instance.currentUser == null) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text("Faça login para favoritar")));
+                return;
+              }
+
+              if (favorito) {
+                await FavoritosService().removerFavorito(widget.nome);
+              } else {
+                await FavoritosService().adicionarFavorito(
+                  nome: widget.nome,
+                  imagem: widget.imagem,
+                  descricao: widget.descricao,
+                );
+              }
+
+              setState(() {
+                favorito = !favorito;
+              });
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
