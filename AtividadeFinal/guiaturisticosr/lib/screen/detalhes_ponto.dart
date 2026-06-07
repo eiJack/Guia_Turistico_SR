@@ -119,11 +119,15 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
 
   //=========telefone/ligação e whatsapp===========
   Future<void> ligarTelefone() async {
-    final uri = Uri.parse('tel:${widget.telefone}');
+    final numero = widget.telefone
+        .replaceAll('(', '')
+        .replaceAll(')', '')
+        .replaceAll('-', '')
+        .replaceAll(' ', '');
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    final uri = Uri.parse('tel:$numero');
+
+    await launchUrl(uri);
   }
 
   Future<void> abrirWhatsapp() async {
@@ -133,7 +137,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
         .replaceAll("-", "")
         .replaceAll(" ", "");
 
-    final uri = Uri.parse('https://wa.me/55$numero');
+    final uri = Uri.parse('https://wa.me/$numero');
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
