@@ -274,20 +274,20 @@ class _HomeState extends State<Home> {
   }) {
     return GestureDetector(
       onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => DetalhesPonto(
-        nome: nome,
-        imagem: imagem,
-        descricao: descricao,
-        telefone: telefone,
-        whatsapp: whatsapp,
-        endereco: endereco,
-      ),
-    ),
-  );
-},
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetalhesPonto(
+              nome: nome,
+              imagem: imagem,
+              descricao: descricao,
+              telefone: telefone,
+              whatsapp: whatsapp,
+              endereco: endereco,
+            ),
+          ),
+        );
+      },
       child: Container(
         width: 180,
         margin: const EdgeInsets.only(right: 10),
@@ -368,21 +368,24 @@ class _HomeState extends State<Home> {
   //=============================================
 
   Widget _cardMenu({required IconData icon, required String titulo, VoidCallback? onTap}) {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3))],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 35, color: const Color(0xFF8B1E3F)),
-          const SizedBox(height: 10),
-          Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3))],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 35, color: const Color(0xFF8B1E3F)),
+            const SizedBox(height: 10),
+            Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }
