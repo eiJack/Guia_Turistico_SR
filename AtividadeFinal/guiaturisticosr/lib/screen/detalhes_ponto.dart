@@ -1,16 +1,16 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:guiaturisticosr/model/avaliacao.dart';
-import 'package:guiaturisticosr/service/avaliacao_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
-import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
+//----------------------------------------------
+import 'package:guiaturisticosr/model/avaliacao.dart';
+import 'package:guiaturisticosr/service/avaliacao_service.dart';
 import 'package:guiaturisticosr/service/favoritos_service.dart';
-import 'package:guiaturisticosr/screen/mapa.dart';
+import 'package:guiaturisticosr/screen/login.dart';
+
 
 class DetalhesPonto extends StatefulWidget {
   final String nome;
@@ -36,6 +36,7 @@ class DetalhesPonto extends StatefulWidget {
 
 class _DetalhesPontoState extends State<DetalhesPonto> {
   int nota = 0;
+  bool favorito = false;
 
   final TextEditingController comentarioController = TextEditingController();
 
@@ -45,14 +46,28 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   final List<Avaliacao> avaliacoes = [];
 
   Future<void> tirarFoto() async {
-    final picker = ImagePicker();
+    try {
+      final picker = ImagePicker();
 
-    final imagem = await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+      final imagem = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 70,
+      );
 
-    if (imagem != null) {
+      if (imagem == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Nenhuma foto foi tirada.")),
+        );
+        return;
+      }
+
       setState(() {
         foto = File(imagem.path);
       });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao abrir a câmera: $e")));
     }
   }
 
@@ -63,77 +78,151 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
     carregarFavorito();
   }
 
-  bool favorito = false;
   Future<void> carregarFavorito() async {
     if (FirebaseAuth.instance.currentUser == null) return;
 
-    favorito = await FavoritosService().isFavorito(widget.nome);
+    final resultado = await FavoritosService().isFavorito(widget.nome);
+
+    print("Verificando favorito: ${widget.nome} = $resultado");
 
     if (mounted) {
-      setState(() {});
+      setState(() {
+        favorito = resultado;
+      });
     }
   }
 
   //==========avaliação===========
-
   Future<void> enviarAvaliacao() async {
-    if (FirebaseAuth.instance.currentUser == null) {
+    try {
+      if (FirebaseAuth.instance.currentUser == null) {
+        _mostrarAvisoLogin();
+        return;
+      }
+
+      if (nota == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Escolha uma nota antes de enviar.")),
+        );
+        return;
+      }
+
+      if (comentarioController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Digite um comentário antes de enviar."),
+          ),
+        );
+        return;
+      }
+
+      String? fotoUrl;
+
+      if (foto != null) {
+        try {
+          final storageRef = FirebaseStorage.instance.ref().child(
+            'avaliacoes/${DateTime.now().millisecondsSinceEpoch}.jpg',
+          );
+
+          await storageRef.putFile(foto!);
+          fotoUrl = await storageRef.getDownloadURL();
+        } catch (e) {
+          fotoUrl = null;
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Não foi possível enviar a foto, mas a avaliação será salva.",
+                ),
+              ),
+            );
+          }
+        }
+      }
+
+      final avaliacao = Avaliacao(
+        nomeUsuario:
+            FirebaseAuth.instance.currentUser?.displayName ?? "Usuário",
+        fotoUsuario:
+            FirebaseAuth.instance.currentUser?.photoURL ??
+            "https://i.pravatar.cc/150?img=5",
+        nota: nota,
+        comentario: comentarioController.text.trim(),
+        fotoAvaliacao: fotoUrl,
+      );
+
+      await AvaliacaoService().salvarAvaliacao(widget.nome, avaliacao);
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Faça login para enviar uma avaliação.')));
-      return;
-    }
+      ).showSnackBar(const SnackBar(content: Text("Avaliação salva!")));
 
-    String? fotoBase64;
-    if (foto != null) {
-      final bytes = await foto!.readAsBytes();
-      fotoBase64 = base64Encode(bytes); // 🔹 converte para string
-    }
-
-    final avaliacao = Avaliacao(
-      nomeUsuario: FirebaseAuth.instance.currentUser?.displayName ?? "Usuário",
-      fotoUsuario: FirebaseAuth.instance.currentUser?.photoURL ?? "https://i.pravatar.cc/150?img=5",
-      nota: nota,
-      comentario: comentarioController.text,
-      fotoAvaliacao: fotoBase64, // 🔹 compatível com modelo
-      dataHora: DateTime.now(),
-    );
-
-    await AvaliacaoService().salvarAvaliacao(widget.nome, avaliacao);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Avaliação salva!')));
       comentarioController.clear();
+
       setState(() {
         nota = 0;
         foto = null;
       });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao enviar avaliação: $e")));
     }
   }
 
   //=========telefone/ligação e whatsapp===========
   Future<void> ligarTelefone() async {
-    final numero = widget.telefone
-        .replaceAll('(', '')
-        .replaceAll(')', '')
-        .replaceAll('-', '')
-        .replaceAll(' ', '');
+    try {
+      final uri = Uri.parse('tel:${widget.telefone}');
 
-    final uri = Uri.parse('tel:$numero');
-
-    await launchUrl(uri);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Não foi possível abrir o telefone.")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao tentar ligar: $e")));
+    }
   }
 
   Future<void> abrirWhatsapp() async {
-    String numero = widget.whatsapp.replaceAll(RegExp(r'[^0-9]'), '');
+    try {
+      final numero = widget.whatsapp
+          .replaceAll("(", "")
+          .replaceAll(")", "")
+          .replaceAll("-", "")
+          .replaceAll(" ", "");
 
-    if (!numero.startsWith('55')) {
-      numero = '55$numero';
+      if (numero.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("WhatsApp não cadastrado.")),
+        );
+        return;
+      }
+
+      final uri = Uri.parse('https://wa.me/55$numero');
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Não foi possível abrir o WhatsApp.")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao abrir WhatsApp: $e")));
     }
-
-    final uri = Uri.parse('https://wa.me/$numero');
-
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -142,15 +231,94 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
     super.dispose();
   }
 
-  //========abrir mapa===========
+  //========mapa===========
   Future<void> abrirMapa() async {
-    final endereco = Uri.encodeComponent(widget.endereco);
+    try {
+      final endereco = Uri.encodeComponent(widget.endereco);
 
-    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$endereco');
+      if (widget.endereco.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Endereço não cadastrado.")),
+        );
+        return;
+      }
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$endereco',
+      );
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Não foi possível abrir o mapa.")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao abrir mapa: $e")));
     }
+  }
+
+  Future<void> abrirRota() async {
+    try {
+      final endereco = Uri.encodeComponent(widget.endereco);
+
+      if (widget.endereco.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Endereço não cadastrado.")),
+        );
+        return;
+      }
+
+      final uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$endereco&travelmode=driving',
+      );
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Não foi possível abrir a rota.")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erro ao abrir rota: $e")));
+    }
+  }
+  
+  //--------------------aviso login-----------------------
+  void _mostrarAvisoLogin() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Login necessário"),
+        content: const Text(
+          "Esta funcionalidade está disponível apenas para usuários logados.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Login()),
+              );
+            },
+            child: const Text("Logar"),
+          ),
+        ],
+      ),
+    );
   }
   //=============
 
@@ -185,25 +353,51 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                         ),
                         onPressed: () async {
                           if (FirebaseAuth.instance.currentUser == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Faça login para favoritar")),
-                            );
+                            _mostrarAvisoLogin();
                             return;
                           }
 
-                          if (favorito) {
-                            await FavoritosService().removerFavorito(widget.nome);
-                          } else {
-                            await FavoritosService().adicionarFavorito(
-                              nome: widget.nome,
-                              imagem: widget.imagem,
-                              descricao: widget.descricao,
+                          try {
+                            final novoEstado = !favorito;
+
+                            setState(() {
+                              favorito = novoEstado;
+                            });
+
+                            if (novoEstado) {
+                              await FavoritosService().adicionarFavorito(
+                                nome: widget.nome,
+                                imagem: widget.imagem,
+                                descricao: widget.descricao,
+                              );
+                            } else {
+                              await FavoritosService().removerFavorito(
+                                widget.nome,
+                              );
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  novoEstado
+                                      ? "Adicionado aos favoritos!"
+                                      : "Removido dos favoritos!",
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            setState(() {
+                              favorito = !favorito;
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Erro ao atualizar favorito: $e"),
+                              ),
                             );
                           }
 
-                          setState(() {
-                            favorito = !favorito;
-                          });
+                          await carregarFavorito();
                         },
                       ),
                     ],
@@ -260,17 +454,26 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                   const SizedBox(height: 10),
 
                   //======botão para abrir mapa========
-                  Center(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.map),
-                      label: const Text('Abrir mapa'),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const MapaScreen()),
-                        );
-                      },
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: abrirMapa,
+                          icon: const Icon(Icons.map),
+                          label: const Text("Mapa"),
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: abrirRota,
+                          icon: const Icon(Icons.directions),
+                          label: const Text("Como chegar"),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const Divider(),
@@ -295,6 +498,11 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                           size: 35,
                         ),
                         onPressed: () {
+                          if (FirebaseAuth.instance.currentUser == null) {
+                            _mostrarAvisoLogin();
+                            return;
+                          }
+
                           setState(() {
                             nota = index + 1;
                           });
@@ -307,6 +515,12 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
 
                   TextField(
                     controller: comentarioController,
+                    readOnly: FirebaseAuth.instance.currentUser == null,
+                    onTap: () {
+                      if (FirebaseAuth.instance.currentUser == null) {
+                        _mostrarAvisoLogin();
+                      }
+                    },
                     maxLines: 4,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
@@ -317,7 +531,14 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                   const SizedBox(height: 10),
 
                   ElevatedButton.icon(
-                    onPressed: tirarFoto,
+                    onPressed: () {
+                      if (FirebaseAuth.instance.currentUser == null) {
+                        _mostrarAvisoLogin();
+                        return;
+                      }
+
+                      tirarFoto();
+                    },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text("Tirar Foto"),
                   ),
@@ -341,7 +562,14 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: enviarAvaliacao,
+                      onPressed: () {
+                        if (FirebaseAuth.instance.currentUser == null) {
+                          _mostrarAvisoLogin();
+                          return;
+                        }
+
+                        enviarAvaliacao();
+                      },
                       icon: const Icon(Icons.send),
                       label: const Text("Enviar Avaliação"),
                     ),
@@ -379,11 +607,8 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                         itemCount: avaliacoes.length,
                         itemBuilder: (context, index) {
                           final dados = avaliacoes[index].data() as Map<String, dynamic>;
-                          final dataHora = dados['dataHora'] != null
-                              ? DateTime.parse(dados['dataHora'])
-                              : null;
 
-                          return Card(
+                         return Card(
                             margin: const EdgeInsets.only(bottom: 15),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
@@ -393,49 +618,45 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                                   Row(
                                     children: [
                                       CircleAvatar(
-                                        backgroundImage: NetworkImage(dados['fotoUsuario']),
+                                        backgroundImage: NetworkImage(
+                                          dados['fotoUsuario'],
+                                        ),
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
                                         child: Text(
                                           dados['nomeUsuario'],
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  if (dataHora != null)
-                                    Text(
-                                      "${dataHora.day}/${dataHora.month}/${dataHora.year} "
-                                      "${dataHora.hour}:${dataHora.minute.toString().padLeft(2, '0')}",
-                                      style: const TextStyle(color: Colors.grey, fontSize: 12),
-                                    ),
                                   const SizedBox(height: 10),
                                   Row(
                                     children: List.generate(
                                       5,
                                       (i) => Icon(
-                                        i < dados['nota'] ? Icons.star : Icons.star_border,
+                                        i < dados['nota']
+                                            ? Icons.star
+                                            : Icons.star_border,
                                         color: Colors.amber,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(height: 10),
                                   Text(dados['comentario']),
-
-                                  // Verifica se existe foto
                                   if (dados['fotoAvaliacao'] != null &&
                                       dados['fotoAvaliacao'].isNotEmpty)
                                     Padding(
                                       padding: const EdgeInsets.only(top: 10),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
-                                        child: Image.memory(
-                                          base64Decode(
-                                            dados['fotoAvaliacao'],
-                                          ), //  converte de volta
-                                          height: 100,
-                                          width: 100,
+                                        child: Image.network(
+                                          dados['fotoAvaliacao'],
+                                          height: 200,
+                                          width: double.infinity,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -455,5 +676,5 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
         ),
       ),
     );
-  }
+  } 
 }
