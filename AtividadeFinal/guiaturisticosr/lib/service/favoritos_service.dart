@@ -6,6 +6,10 @@ class FavoritosService {
 
   String get uid => FirebaseAuth.instance.currentUser!.uid;
 
+  String gerarId(String nome) {
+    return nome.toLowerCase().trim().replaceAll(' ', '_').replaceAll('/', '_');
+  }
+
   Stream<QuerySnapshot> listarFavoritos() {
     return _firestore.collection('usuarios').doc(uid).collection('favoritos').snapshots();
   }
@@ -15,23 +19,24 @@ class FavoritosService {
     required String imagem,
     required String descricao,
   }) async {
-    await _firestore.collection('usuarios').doc(uid).collection('favoritos').doc(nome).set({
-      'nome': nome,
-      'imagem': imagem,
-      'descricao': descricao,
-    });
+    await _firestore
+        .collection('usuarios')
+        .doc(uid)
+        .collection('favoritos')
+        .doc(gerarId(nome))
+        .set({'nome': nome, 'imagem': imagem, 'descricao': descricao});
   }
 
   Future<void> removerFavorito(String nome) async {
-    await _firestore.collection('usuarios').doc(uid).collection('favoritos').doc(nome).delete();
+    await _firestore.collection('usuarios').doc(uid).collection('favoritos').doc(gerarId(nome)).delete();
   }
 
   Future<bool> isFavorito(String nome) async {
-    final doc = await FirebaseFirestore.instance
+    final doc = await _firestore
         .collection('usuarios')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .doc(uid)
         .collection('favoritos')
-        .doc(nome)
+        .doc(gerarId(nome))
         .get();
 
     return doc.exists;
