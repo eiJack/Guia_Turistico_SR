@@ -8,6 +8,7 @@ class MapaController {
   //lista de categorias
   final List<String> categorias = [
     'Todos',
+    'Vinicola',
     'Rota do Vinho',
     'Restaurante',
     'Hotel',
@@ -23,6 +24,10 @@ class MapaController {
     //mostra todos os pontos ao filtrar
     if (categoriaSelecionada == 'Todos') {
       return todosPontos();
+    }
+
+    if (categoriaSelecionada == 'Rota do Vinho') {
+      return todosPontos().where((ponto) => ponto.rotaDoVinho == true).toList();
     }
 
     //filtra apenas categoria escolhida
