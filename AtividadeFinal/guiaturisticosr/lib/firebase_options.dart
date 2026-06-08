@@ -41,49 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAY0E4cPP2Nw_1Zieu3p7nnW7lo-O_RGjg',
-    appId: '1:869153437004:web:8cede0c849344bea2dcbe9',
-    messagingSenderId: '869153437004',
-    projectId: 'guiaturisticosr',
-    authDomain: 'guiaturisticosr.firebaseapp.com',
-    storageBucket: 'guiaturisticosr.firebasestorage.app',
+    apiKey: 'AIzaSyAc-rec7i6TwYLmtiKF3GEF4oGNl1OGRdI',
+    appId: '1:383445250997:web:664ca2d4415ba1a299dffc',
+    messagingSenderId: '383445250997',
+    projectId: 'guia-turistico-sr-jacke',
+    authDomain: 'guia-turistico-sr-jacke.firebaseapp.com',
+    storageBucket: 'guia-turistico-sr-jacke.firebasestorage.app',
+    measurementId: 'G-GMQ4F27E5K',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAuiUji-EBI_XiNlDGEUXWDP9ThWBvzseI',
-    appId: '1:869153437004:android:5247656efef6ac982dcbe9',
-    messagingSenderId: '869153437004',
-    projectId: 'guiaturisticosr',
-    storageBucket: 'guiaturisticosr.firebasestorage.app',
+    apiKey: 'AIzaSyB3kJEDc6PKStN1GvmUx56OtyHpsQ1W9fA',
+    appId: '1:383445250997:android:7f9c8fb3d3c0471699dffc',
+    messagingSenderId: '383445250997',
+    projectId: 'guia-turistico-sr-jacke',
+    storageBucket: 'guia-turistico-sr-jacke.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBW790JtzBlmhZxXiH42cM-Yc5T15aZpww',
-    appId: '1:869153437004:ios:94de9badbad640082dcbe9',
-    messagingSenderId: '869153437004',
-    projectId: 'guiaturisticosr',
-    storageBucket: 'guiaturisticosr.firebasestorage.app',
-    iosClientId: '869153437004-fn7hna93geid1dkgkssfp1btfq4dq3ba.apps.googleusercontent.com',
+    apiKey: 'AIzaSyCjVsTrLP60NkJbnG7f1y8utS4BWOJtlUw',
+    appId: '1:383445250997:ios:eeaa7c00d9f2658e99dffc',
+    messagingSenderId: '383445250997',
+    projectId: 'guia-turistico-sr-jacke',
+    storageBucket: 'guia-turistico-sr-jacke.firebasestorage.app',
     iosBundleId: 'com.example.guiaturisticosr',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBW790JtzBlmhZxXiH42cM-Yc5T15aZpww',
-    appId: '1:869153437004:ios:94de9badbad640082dcbe9',
-    messagingSenderId: '869153437004',
-    projectId: 'guiaturisticosr',
-    storageBucket: 'guiaturisticosr.firebasestorage.app',
-    iosClientId: '869153437004-fn7hna93geid1dkgkssfp1btfq4dq3ba.apps.googleusercontent.com',
+    apiKey: 'AIzaSyCjVsTrLP60NkJbnG7f1y8utS4BWOJtlUw',
+    appId: '1:383445250997:ios:eeaa7c00d9f2658e99dffc',
+    messagingSenderId: '383445250997',
+    projectId: 'guia-turistico-sr-jacke',
+    storageBucket: 'guia-turistico-sr-jacke.firebasestorage.app',
     iosBundleId: 'com.example.guiaturisticosr',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAY0E4cPP2Nw_1Zieu3p7nnW7lo-O_RGjg',
-    appId: '1:869153437004:web:57d1972a04d781e32dcbe9',
-    messagingSenderId: '869153437004',
-    projectId: 'guiaturisticosr',
-    authDomain: 'guiaturisticosr.firebaseapp.com',
-    storageBucket: 'guiaturisticosr.firebasestorage.app',
+    apiKey: 'AIzaSyAc-rec7i6TwYLmtiKF3GEF4oGNl1OGRdI',
+    appId: '1:383445250997:web:796586035fc99a1099dffc',
+    messagingSenderId: '383445250997',
+    projectId: 'guia-turistico-sr-jacke',
+    authDomain: 'guia-turistico-sr-jacke.firebaseapp.com',
+    storageBucket: 'guia-turistico-sr-jacke.firebasestorage.app',
+    measurementId: 'G-3ZCRKCQ76D',
   );
-
 }
