@@ -3,8 +3,7 @@ class Avaliacao {
   final String fotoUsuario;
   final int nota;
   final String comentario;
-  final String? fotoAvaliacao; //  agora é String (Base64)
-  final DateTime dataHora;
+  final String? fotoAvaliacao;
 
   Avaliacao({
     required this.nomeUsuario,
@@ -12,7 +11,6 @@ class Avaliacao {
     required this.nota,
     required this.comentario,
     this.fotoAvaliacao,
-    required this.dataHora,
   });
 
   Map<String, dynamic> toMap() {
@@ -21,8 +19,7 @@ class Avaliacao {
       'fotoUsuario': fotoUsuario,
       'nota': nota,
       'comentario': comentario,
-      'fotoAvaliacao': fotoAvaliacao, //  salva como string
-      'dataHora': dataHora.toIso8601String(),
+      'fotoAvaliacao': fotoAvaliacao,
     };
   }
 
@@ -32,8 +29,7 @@ class Avaliacao {
       fotoUsuario: map['fotoUsuario'],
       nota: map['nota'],
       comentario: map['comentario'],
-      fotoAvaliacao: map['fotoAvaliacao'], //  lê como string
-      dataHora: DateTime.parse(map['dataHora']),
+      fotoAvaliacao: map['fotoAvaliacao'],
     );
   }
 }
