@@ -120,7 +120,7 @@ class PontosService {
       PontosTuristicos(
         nome: 'O Cortês Bar e Restaurante',
         categoria: 'Restaurante',
-        rotaDoVinho: true,
+        rotaDoVinho: false,
         latitude: -23.52562,
         longitude: -47.13336,
         descricao: 'Restaurante e bar em São Roque.',
