@@ -1,45 +1,45 @@
 {
   "project_info": {
-    "project_number": "869153437004",
-    "project_id": "guiaturisticosr",
-    "storage_bucket": "guiaturisticosr.firebasestorage.app"
+    "project_number": "383445250997",
+    "project_id": "guia-turistico-sr-jacke",
+    "storage_bucket": "guia-turistico-sr-jacke.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:869153437004:android:5247656efef6ac982dcbe9",
+        "mobilesdk_app_id": "1:383445250997:android:7f9c8fb3d3c0471699dffc",
         "android_client_info": {
           "package_name": "com.example.guiaturisticosr"
         }
       },
       "oauth_client": [
         {
-          "client_id": "869153437004-vh7pkicmsrpgrq89h1uhih34n64bdfke.apps.googleusercontent.com",
+          "client_id": "383445250997-sl4ihkq814quvqoi24e3u6oar33nt0uv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.guiaturisticosr",
-            "certificate_hash": "f9e616a4fbe4b71027c4a9fcf7e66dcd6b106bcc"
+            "certificate_hash": "526ffb6e4ecd78474681314389e23e7fce0fc780"
           }
         },
         {
-          "client_id": "869153437004-38latbp6fs1lce1771tn8cilqlfk4qv5.apps.googleusercontent.com",
+          "client_id": "383445250997-hohsed4vr009pjbt0a18rmprdf0vhfpk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAuiUji-EBI_XiNlDGEUXWDP9ThWBvzseI"
+          "current_key": "AIzaSyB3kJEDc6PKStN1GvmUx56OtyHpsQ1W9fA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "869153437004-38latbp6fs1lce1771tn8cilqlfk4qv5.apps.googleusercontent.com",
+              "client_id": "383445250997-hohsed4vr009pjbt0a18rmprdf0vhfpk.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "869153437004-fn7hna93geid1dkgkssfp1btfq4dq3ba.apps.googleusercontent.com",
+              "client_id": "383445250997-kmldt7bpfketukiucuqjlqi175kt85pv.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.guiaturisticosr"
