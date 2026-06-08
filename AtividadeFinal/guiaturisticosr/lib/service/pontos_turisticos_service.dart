@@ -7,7 +7,7 @@ class PontosService {
       // ROTA DO VINHO
       PontosTuristicos(
         nome: 'Villa Don Patto',
-        categoria: 'Rota do Vinho',
+        categoria: 'Vinicola',
         rotaDoVinho: true,
         latitude: -23.5636425,
         longitude: -47.1357421,
@@ -16,7 +16,7 @@ class PontosService {
 
       PontosTuristicos(
         nome: 'Vinícola XV de Novembro',
-        categoria: 'Rota do Vinho',
+        categoria: 'Vinicola',
         rotaDoVinho: true,
         latitude: -23.5837880,
         longitude: -47.1419250,
@@ -82,7 +82,7 @@ class PontosService {
 
       PontosTuristicos(
         nome: 'Vinícola Goes',
-        categoria: 'Rota do Vinho',
+        categoria: 'Vinicola',
         rotaDoVinho: true,
         latitude: -23.61079,
         longitude: -47.16019,
@@ -91,7 +91,7 @@ class PontosService {
 
       PontosTuristicos(
         nome: 'Bella Aurora',
-        categoria: 'Rota do Vinho',
+        categoria: 'Vinicola',
         rotaDoVinho: false,
         latitude: -23.55364,
         longitude: -47.10524,
