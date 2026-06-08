@@ -7,7 +7,8 @@ import 'package:guiaturisticosr/model/avaliacao.dart';
 import 'package:guiaturisticosr/service/avaliacao_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:guiaturisticosr/service/favoritos_service.dart';
 import 'package:guiaturisticosr/screen/mapa.dart';
 
@@ -74,6 +75,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   }
 
   //==========avaliação===========
+
   Future<void> enviarAvaliacao() async {
     if (FirebaseAuth.instance.currentUser == null) {
       ScaffoldMessenger.of(
@@ -82,18 +84,10 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
       return;
     }
 
-    String? fotoUrl;
-
+    String? fotoBase64;
     if (foto != null) {
-      print('Iniciando upload...');
-
-      final storageRef = FirebaseStorage.instance.ref().child(
-        'avaliacoes/${DateTime.now().millisecondsSinceEpoch}.jpg',
-      );
-
-      await storageRef.putFile(foto!);
-
-      fotoUrl = await storageRef.getDownloadURL();
+      final bytes = await foto!.readAsBytes();
+      fotoBase64 = base64Encode(bytes); // 🔹 converte para string
     }
 
     final avaliacao = Avaliacao(
@@ -101,14 +95,14 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
       fotoUsuario: FirebaseAuth.instance.currentUser?.photoURL ?? "https://i.pravatar.cc/150?img=5",
       nota: nota,
       comentario: comentarioController.text,
-      fotoAvaliacao: fotoUrl,
+      fotoAvaliacao: fotoBase64, // 🔹 compatível com modelo
+      dataHora: DateTime.now(),
     );
 
     await AvaliacaoService().salvarAvaliacao(widget.nome, avaliacao);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Avaliação salva!')));
-
       comentarioController.clear();
       setState(() {
         nota = 0;
@@ -385,6 +379,9 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                         itemCount: avaliacoes.length,
                         itemBuilder: (context, index) {
                           final dados = avaliacoes[index].data() as Map<String, dynamic>;
+                          final dataHora = dados['dataHora'] != null
+                              ? DateTime.parse(dados['dataHora'])
+                              : null;
 
                           return Card(
                             margin: const EdgeInsets.only(bottom: 15),
@@ -407,6 +404,12 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                                       ),
                                     ],
                                   ),
+                                  if (dataHora != null)
+                                    Text(
+                                      "${dataHora.day}/${dataHora.month}/${dataHora.year} "
+                                      "${dataHora.hour}:${dataHora.minute.toString().padLeft(2, '0')}",
+                                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                    ),
                                   const SizedBox(height: 10),
                                   Row(
                                     children: List.generate(
@@ -419,16 +422,20 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                                   ),
                                   const SizedBox(height: 10),
                                   Text(dados['comentario']),
+
+                                  // Verifica se existe foto
                                   if (dados['fotoAvaliacao'] != null &&
                                       dados['fotoAvaliacao'].isNotEmpty)
                                     Padding(
                                       padding: const EdgeInsets.only(top: 10),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
-                                        child: Image.network(
-                                          dados['fotoAvaliacao'],
-                                          height: 200,
-                                          width: double.infinity,
+                                        child: Image.memory(
+                                          base64Decode(
+                                            dados['fotoAvaliacao'],
+                                          ), //  converte de volta
+                                          height: 100,
+                                          width: 100,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
