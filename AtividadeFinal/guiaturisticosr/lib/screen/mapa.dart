@@ -1,4 +1,6 @@
 import '../controller/mapa_controller.dart';
+import '../screen/detalhes_ponto.dart';
+import 'package:guiaturisticosr/data/pontos_turisticos.dart';
 //----------------------------------------------
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -47,6 +49,10 @@ class _MapaScreenState extends State<MapaScreen> {
                 setState(() {
                   mapaPronto = true;
                 });
+
+                if (minhaLocalizacao != null) {
+                  mapController.move(minhaLocalizacao!, 15);
+                }
               },
               onPositionChanged: (position, hasGesture) {
                 zoomAtual = position.zoom;
@@ -83,12 +89,17 @@ class _MapaScreenState extends State<MapaScreen> {
                         },
                         child: Icon(
                           _iconPorCategoria(ponto.categoria),
-                          color: _corPorCategoria(ponto.categoria),
+                          color:
+                              controller.categoriaSelecionada ==
+                                      'Rota do Vinho' &&
+                                  ponto.rotaDoVinho
+                              ? const Color(0xFF8B1E3F)
+                              : _corPorCategoria(ponto.categoria),
                           size: 40,
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ],
@@ -112,15 +123,23 @@ class _MapaScreenState extends State<MapaScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: selecionado ? const Color(0xFF8B1E3F) : Colors.white,
+                      color: selecionado
+                          ? const Color(0xFF8B1E3F)
+                          : Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: const [
-                        BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 2)),
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 5,
+                          offset: Offset(0, 2),
+                        ),
                       ],
                     ),
                     child: Icon(
                       _iconPorCategoria(categoria),
-                      color: selecionado ? Colors.white : const Color(0xFF8B1E3F),
+                      color: selecionado
+                          ? Colors.white
+                          : const Color(0xFF8B1E3F),
                       size: 26,
                     ),
                   ),
@@ -183,22 +202,61 @@ class _MapaScreenState extends State<MapaScreen> {
       ),
       builder: (_) {
         return Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(ponto.nome, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text(
+                ponto.nome,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
               const SizedBox(height: 8),
 
-              Text(ponto.categoria, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+              Text(
+                ponto.descricao,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
 
               const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  final todosOsPontos = [...rotaDoVinho, ...hoteis, ...turismo];
 
-              Text(ponto.descricao, style: const TextStyle(fontSize: 16)),
+                  final pontoDetalhe = todosOsPontos.firstWhere(
+                    (p) => p['nome'] == ponto.nome,
+                    orElse: () => {
+                      'nome': ponto.nome,
+                      'imagem': '',
+                      'descricao': ponto.descricao,
+                      'telefone': '',
+                      'whatsapp': '',
+                      'endereco': '',
+                    },
+                  );
 
-              const SizedBox(height: 20),
+                  Navigator.pop(context);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetalhesPonto(
+                        nome: pontoDetalhe['nome'] ?? '',
+                        imagem: pontoDetalhe['imagem'] ?? '',
+                        descricao: pontoDetalhe['descricao'] ?? '',
+                        telefone: pontoDetalhe['telefone'] ?? '',
+                        whatsapp: pontoDetalhe['whatsapp'] ?? '',
+                        endereco: pontoDetalhe['endereco'] ?? '',
+                      ),
+                    ),
+                  );
+                },
+                child: const Text("Ver detalhes"),
+              ),
             ],
           ),
         );
@@ -221,6 +279,9 @@ class _MapaScreenState extends State<MapaScreen> {
       case 'Ponto turistico':
         return Icons.camera_alt;
 
+      case 'Vinicola':
+        return Icons.liquor;
+
       default:
         return Icons.location_pin;
     }
@@ -238,6 +299,9 @@ class _MapaScreenState extends State<MapaScreen> {
       case 'Hotel':
         return Colors.blue;
 
+      case 'Vinicola':
+        return const Color.fromARGB(255, 127, 28, 154);
+
       case 'Ponto turistico':
         return Colors.green;
 
@@ -254,9 +318,9 @@ class _MapaScreenState extends State<MapaScreen> {
     servicoAtivo = await Geolocator.isLocationServiceEnabled();
 
     if (!servicoAtivo) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Ative a localização do dispositivo.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Ative a localização do dispositivo.")),
+      );
       return;
     }
 
@@ -266,16 +330,18 @@ class _MapaScreenState extends State<MapaScreen> {
       permissao = await Geolocator.requestPermission();
 
       if (permissao == LocationPermission.denied) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Permissão de localização negada.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Permissão de localização negada.")),
+        );
         return;
       }
     }
 
     if (permissao == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Permissão de localização negada permanentemente.")),
+        const SnackBar(
+          content: Text("Permissão de localização negada permanentemente."),
+        ),
       );
       return;
     }
@@ -284,7 +350,10 @@ class _MapaScreenState extends State<MapaScreen> {
 
     if (!mounted) return;
 
-    final LatLng localizacaoUsuario = LatLng(posicao.latitude, posicao.longitude);
+    final LatLng localizacaoUsuario = LatLng(
+      posicao.latitude,
+      posicao.longitude,
+    );
 
     final double distanciaEmMetros = Geolocator.distanceBetween(
       localizacaoUsuario.latitude,
@@ -315,7 +384,9 @@ class _MapaScreenState extends State<MapaScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Você está fora da região de São Roque. Exibindo mapa padrão."),
+            content: Text(
+              "Você está fora da região de São Roque. Exibindo mapa padrão.",
+            ),
           ),
         );
       }
