@@ -93,6 +93,8 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
   }
 
   //==========avaliação===========
+  //nota e comentario são obrigatorios
+  //tratamento para erro ao enviar foto e avaliação
   Future<void> enviarAvaliacao() async {
     try {
       if (FirebaseAuth.instance.currentUser == null) {
@@ -583,7 +585,8 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                   ),
 
                   const SizedBox(height: 15),
-
+                  
+                  // Exibe avaliações em tempo real utilizando Stream do Firestore.
                   StreamBuilder<QuerySnapshot>(
                     stream: AvaliacaoService().carregarAvaliacoes(widget.nome),
                     builder: (context, snapshot) {
