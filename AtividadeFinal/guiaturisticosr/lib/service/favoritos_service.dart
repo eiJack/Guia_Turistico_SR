@@ -6,6 +6,7 @@ class FavoritosService {
 
   String get uid => FirebaseAuth.instance.currentUser!.uid;
 
+  // ID padronizado -evita duplicar e problemas com caracteres especiais
   String gerarId(String nome) {
     return nome.toLowerCase().trim().replaceAll(' ', '_').replaceAll('/', '_');
   }
