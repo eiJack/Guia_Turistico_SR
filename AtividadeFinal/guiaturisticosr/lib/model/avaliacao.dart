@@ -4,6 +4,7 @@ class Avaliacao {
   final int nota;
   final String comentario;
   final String? fotoAvaliacao;
+  final DateTime dataHora;
 
   Avaliacao({
     required this.nomeUsuario,
@@ -11,6 +12,7 @@ class Avaliacao {
     required this.nota,
     required this.comentario,
     this.fotoAvaliacao,
+    required this.dataHora,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class Avaliacao {
       'nota': nota,
       'comentario': comentario,
       'fotoAvaliacao': fotoAvaliacao,
+      'dataHora': dataHora,
     };
   }
 
@@ -30,6 +33,7 @@ class Avaliacao {
       nota: map['nota'],
       comentario: map['comentario'],
       fotoAvaliacao: map['fotoAvaliacao'],
+      dataHora: map['dataHora'].toDate(),
     );
   }
 }
