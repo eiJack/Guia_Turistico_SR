@@ -12,6 +12,8 @@ class AvaliacaoService {
         .add(avaliacao.toMap());
   }
 
+  // sempre que uma avaliação for adicionada, alterada ou removida
+  // processo é atualizado em tempo real
   Stream<QuerySnapshot> carregarAvaliacoes(String pontoTuristico) {
     return FirebaseFirestore.instance
         .collection('avaliacoes')
