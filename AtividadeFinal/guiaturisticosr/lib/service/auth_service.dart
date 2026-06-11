@@ -19,12 +19,14 @@ class AuthService {
       if (googleUser == null) return null;
 
       final googleAuth = await googleUser.authentication;
-
+      
+      // Cria a credencial utilizada pelo Firebase Authentication.
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // Realiza o login
       final userCredential = await _auth.signInWithCredential(credential);
       return userCredential.user;
     } catch (e) {
