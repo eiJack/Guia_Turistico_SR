@@ -26,6 +26,7 @@ class MapaController {
       return todosPontos();
     }
 
+    //filtro para a rota do vinho -> apenas elementros listados com Rota do vinho: true
     if (categoriaSelecionada == 'Rota do Vinho') {
       return todosPontos().where((ponto) => ponto.rotaDoVinho == true).toList();
     }
