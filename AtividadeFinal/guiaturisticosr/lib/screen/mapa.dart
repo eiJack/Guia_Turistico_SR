@@ -15,6 +15,7 @@ class MapaScreen extends StatefulWidget {
 }
 
 class _MapaScreenState extends State<MapaScreen> {
+  // Controla filtros, categorias e pontos exibidos no mapa.
   final MapaController controller = MapaController();
   final MapController mapController = MapController();
 
@@ -27,7 +28,7 @@ class _MapaScreenState extends State<MapaScreen> {
   @override
   void initState() {
     super.initState();
-    _pegarLocalizacaoAtual();
+    _pegarLocalizacaoAtual(); // Obtém a localização do usuário ao abrir a tela.
   }
 
   @override
@@ -78,6 +79,7 @@ class _MapaScreenState extends State<MapaScreen> {
                       ),
                     ),
 
+                  // Exibe os pontos turísticos filtrados pela categoria selecionada.
                   ...pontos.map((ponto) {
                     return Marker(
                       point: LatLng(ponto.latitude, ponto.longitude),
