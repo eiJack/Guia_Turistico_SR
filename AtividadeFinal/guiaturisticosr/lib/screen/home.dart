@@ -65,6 +65,8 @@ class _HomeState extends State<Home> {
         centerTitle: true,
       ),
 
+      // Mostra os dados do usuário logado no menu lateral.
+      // Caso não esteja logado, exibe o perfil como Visitante.
       drawer: Drawer(
         child: ListView(
           children: [
