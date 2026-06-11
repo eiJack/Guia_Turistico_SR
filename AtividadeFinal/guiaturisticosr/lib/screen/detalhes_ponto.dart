@@ -152,6 +152,7 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
         nota: nota,
         comentario: comentarioController.text.trim(),
         fotoAvaliacao: fotoUrl,
+        dataHora: DateTime.now(),
       );
 
       await AvaliacaoService().salvarAvaliacao(widget.nome, avaliacao);
@@ -610,6 +611,14 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                         itemCount: avaliacoes.length,
                         itemBuilder: (context, index) {
                           final dados = avaliacoes[index].data() as Map<String, dynamic>;
+                          final dataHora = dados['dataHora']?.toDate();
+                          final dataFormatada = dataHora != null
+                            ? "${dataHora.day.toString().padLeft(2, '0')}/"
+                              "${dataHora.month.toString().padLeft(2, '0')}/"
+                              "${dataHora.year} às "
+                              "${dataHora.hour.toString().padLeft(2, '0')}:"
+                              "${dataHora.minute.toString().padLeft(2, '0')}"
+                            : "";
 
                          return Card(
                             margin: const EdgeInsets.only(bottom: 15),
@@ -632,6 +641,14 @@ class _DetalhesPontoState extends State<DetalhesPonto> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),
+                                        ),
+                                      ),
+                                      if (dataFormatada.isNotEmpty)
+                                        Text(
+                                          dataFormatada,
+                                          style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
                                         ),
                                       ),
                                     ],
